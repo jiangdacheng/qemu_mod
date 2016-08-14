@@ -1696,6 +1696,26 @@ fail:
                       MIGRATION_STATUS_FAILED);
 }
 
+
+static bool testsignal(void)
+{
+    FILE *inputFilePtr;
+    char c;
+    printf("heheda\n");
+    inputFilePtr = fopen("/signal.txt", "r");
+    if (!inputFilePtr) {
+        printf("File not open\n");
+        return false;
+    }
+    c = fgetc(inputFilePtr);
+    if (c == 'c') 
+        return true;
+    else {
+        printf("%c\n", c);
+        return false;
+    }
+}
+
 /*
  * Master migration thread on the source VM.
  * It drives the migration and pumps the data down the outgoing channel.
@@ -1773,7 +1793,8 @@ static void *migration_thread(void *opaque)
                 }
                 /* Just another iteration step */
                 qemu_savevm_state_iterate(s->to_dst_file, entered_postcopy);
-            } else {
+            } else if (testsignal())
+            {
                 trace_migration_thread_low_pending(pending_size);
                 migration_completion(s, current_active_state,
                                      &old_vm_running, &start_time);
